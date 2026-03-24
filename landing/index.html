@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OM Atlas — See market-moving risk before it hits price</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-main':    '#181c29',
+            'bg-section': '#1a1e2d',
+            'bg-card':    '#252937',
+            'accent':     '#80c4f4',
+            'blue':       '#4a8eff',
+            'muted':      '#979797',
+          },
+          maxWidth: {
+            'content': '1400px',
+            'nav':     '1200px',
+          },
+          screens: {
+            'sm':  { 'max': '639px' },
+            'md':  '640px',
+            'xl':  '1024px',
+            '2xl': '1280px',
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { overflow-x: hidden; }
+    body { -webkit-font-smoothing: antialiased; font-family: Arial, sans-serif; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── Interactive states ─── */
+
+    /* Shared focus ring — green outline matching Figma */
+    .btn:focus-visible,
+    .link-icon:focus-visible {
+      outline: 2px solid #22c55e;
+      outline-offset: 2px;
+    }
+
+    /* Blue filled buttons (Contact us, Request a Demo) */
+    .btn-primary {
+      transition: background-color 160ms ease, transform 160ms ease-out;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-primary:hover { background-color: #3a7aef; }
+    }
+    .btn-primary:active { transform: scale(0.97); }
+
+    /* Ghost / transparent buttons (Download Investor Brief) */
+    .btn-ghost {
+      transition: background-color 160ms ease, transform 160ms ease-out;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-ghost:hover { background-color: rgba(255,255,255,0.14); }
+    }
+    .btn-ghost:active { transform: scale(0.97); }
+
+    /* LinkedIn icon */
+    .link-icon {
+      transition: opacity 160ms ease, transform 160ms ease-out;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .link-icon:hover { opacity: 0.8; }
+    }
+    .link-icon:active { transform: scale(0.92); }
+
+    /* Logo link */
+    .link-logo {
+      transition: opacity 160ms ease;
+    }
+    .link-logo:focus-visible {
+      outline: 2px solid #22c55e;
+      outline-offset: 2px;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .link-logo:hover { opacity: 0.85; }
+    }
+
+    /* ─── Shimmer border on CTA ─── */
+    @keyframes borderShimmer {
+      from { --shimmer-angle: 0deg; }
+      to   { --shimmer-angle: 360deg; }
+    }
+    @property --shimmer-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+    .btn-shimmer {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .btn-shimmer::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: conic-gradient(
+        from var(--shimmer-angle),
+        transparent 0%,
+        transparent 70%,
+        rgba(255,255,255,0.6) 78%,
+        rgba(255,255,255,0.9) 80%,
+        rgba(255,255,255,0.6) 82%,
+        transparent 90%,
+        transparent 100%
+      );
+      animation: borderShimmer 3s linear infinite;
+      z-index: -2;
+    }
+    .btn-shimmer::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      background: #4a8eff;
+      z-index: -1;
+      transition: background-color 160ms ease;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-shimmer:hover::after { background-color: #3a7aef; }
+    }
+
+    /* ─── Hero entry animation ─── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-animate {
+      opacity: 0;
+      animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .hero-animate-d1 { animation-delay: 0s; }
+    .hero-animate-d2 { animation-delay: 0.12s; }
+    .hero-animate-d3 { animation-delay: 0.24s; }
+    .hero-animate-d4 { animation-delay: 0.4s; }
+  </style>
+</head>
+<body class="bg-bg-main text-white">
+
+  <!-- ─── NAVIGATION (fixed · 120px total) ─────────────────── -->
+  <nav class="fixed top-0 left-0 right-0 bg-bg-section border-b border-white/[0.08] z-[100]">
+    <div class="flex flex-col gap-2 items-center p-4 md:px-10">
+
+      <!-- Topbar: email + LinkedIn -->
+      <div class="h-10 w-full max-w-nav flex items-center justify-between">
+        <span class="text-base text-white leading-[1.5]">info@omanalytix.com</span>
+        <a href="https://www.linkedin.com/company/om-analytix/?viewAsMember=true" target="_blank"
+           class="link-icon bg-white w-6 h-6 flex items-center justify-center">
+          <img src="assets/linkedin.svg"
+               alt="LinkedIn" class="w-5 h-5">
+        </a>
+      </div>
+
+      <!-- Main Nav: logo + CTA -->
+      <div class="h-10 w-full max-w-nav flex items-center justify-between">
+        <a href="#" class="link-logo">
+          <img src="assets/logo.png"
+               alt="OM Analytix" class="h-8 w-[177px] object-contain">
+        </a>
+        <a href="https://omanalytix.ch/contact/"
+           class="btn btn-primary bg-blue h-9 md:h-10 px-4 inline-flex items-center justify-center text-sm md:text-base font-bold text-white whitespace-nowrap leading-[1.2]">
+          Contact us
+        </a>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- Page offset for fixed nav -->
+  <div class="pt-[120px]">
+
+    <!-- ─── HERO SECTION ───────────────────────────────────── -->
+    <section class="bg-bg-section overflow-hidden">
+
+      <!-- ── sm + md: STACKED layout ── -->
+      <div class="xl:hidden flex flex-col gap-8 p-4 md:p-10">
+
+        <!-- Text block -->
+        <div class="flex flex-col gap-4">
+          <h1 class="hero-animate hero-animate-d1 font-bold text-[32px] md:text-[40px] leading-[1.2] text-white">
+            See market-moving risk<br><span class="text-accent">before it hits</span> price.
+          </h1>
+          <p class="hero-animate hero-animate-d2 text-sm md:text-base leading-[1.5] text-white">
+            Atlas turns geopolitical, regulatory, logistics, and market-structure signals into
+            measurable risk channels — mapped to tickers, sectors, and scenarios so investors
+            can act faster and with more conviction.
+          </p>
+          <div class="hero-animate hero-animate-d3 flex flex-col md:flex-row gap-5 pt-4">
+            <a href="https://omanalytix.ch/#"
+               class="btn btn-primary btn-shimmer h-9 md:h-10 md:flex-1 px-4 bg-blue inline-flex items-center justify-center text-sm md:text-base font-bold text-white whitespace-nowrap leading-[1.2]">
+              Request a Demo
+            </a>
+            <a href="https://omanalytix.ch/#"
+               class="btn btn-ghost h-9 md:h-10 md:flex-1 px-4 bg-white/[0.08] inline-flex items-center justify-center gap-2 text-sm md:text-base font-bold text-white whitespace-nowrap leading-[1.2]">
+              Download Investor Brief
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="white"><path d="M12 16L7 11L8.4 9.55L11 12.15V4H13V12.15L15.6 9.55L17 11L12 16ZM4 20V15H6V18H18V15H20V20H4Z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Dashboard image — fixed size, overflows viewport, clipped by section -->
+        <div class="hero-animate hero-animate-d4 w-[506px] md:w-[822px] h-[320px] md:h-[520px] flex-shrink-0 relative">
+          <img src="assets/hero-dashboard.png"
+               alt="OM Atlas Dashboard"
+               class="absolute inset-0 w-full h-full object-cover">
+        </div>
+
+      </div>
+
+      <!-- ── xl + 2xl: SIDE-BY-SIDE layout (639px fixed height) ── -->
+      <div class="hidden xl:block h-[639px]">
+        <div class="h-full max-w-content mx-auto flex gap-8 p-10">
+
+          <!-- Text column — flex-1, vertically centered content -->
+          <div class="flex-1 max-w-[644px] flex flex-col justify-center gap-4">
+            <h1 class="hero-animate hero-animate-d1 font-bold text-[48px] leading-[1.2] text-white">
+              See market-moving risk<br><span class="text-accent">before it hits</span> price.
+            </h1>
+            <p class="hero-animate hero-animate-d2 text-[18px] leading-[1.5] text-white">
+              Atlas turns geopolitical, regulatory, logistics, and market-structure signals into
+              measurable risk channels — mapped to tickers, sectors, and scenarios so investors
+              can act faster and with more conviction.
+            </p>
+            <div class="hero-animate hero-animate-d3 flex gap-5 pt-4">
+              <a href="https://omanalytix.ch/#"
+                 class="btn btn-primary btn-shimmer h-10 px-4 bg-blue inline-flex items-center justify-center text-base font-bold text-white whitespace-nowrap leading-[1.2]">
+                Request a Demo
+              </a>
+              <a href="https://omanalytix.ch/#"
+                 class="btn btn-ghost h-10 px-4 bg-white/[0.08] w-[249px] inline-flex items-center justify-center gap-2 text-base font-bold text-white whitespace-nowrap leading-[1.2]">
+                Download Investor Brief
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 16L7 11L8.4 9.55L11 12.15V4H13V12.15L15.6 9.55L17 11L12 16ZM4 20V15H6V18H18V15H20V20H4Z"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- Image column — fixed size, overflows viewport, clipped by section -->
+          <div class="hero-animate hero-animate-d4 flex-1 min-w-0 flex items-center">
+            <div class="w-[949px] h-[600px] flex-shrink-0 relative">
+              <img src="assets/hero-dashboard.png"
+                   alt="OM Atlas Dashboard"
+                   class="absolute inset-0 w-full h-full object-cover object-left">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+</body>
+</html>
