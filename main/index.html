@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OM Atlas — See market-moving risk before it hits price</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-main':    '#181c29',
+            'bg-section': '#1a1e2d',
+            'bg-card':    '#252937',
+            'accent':     '#80c4f4',
+            'blue':       '#4a8eff',
+            'muted':      '#979797',
+          },
+          maxWidth: {
+            'container': '1280px',
+          },
+          screens: {
+            'sm':  { 'max': '639px' },
+            'md':  '640px',
+            'xl':  '1024px',
+            '2xl': '1280px',
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { overflow-x: hidden; }
+    body { -webkit-font-smoothing: antialiased; font-family: Arial, sans-serif; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── Interactive states ─── */
+
+    /* Shared focus ring — green outline matching Figma */
+    .btn:focus-visible,
+    .link-icon:focus-visible {
+      outline: 2px solid #22c55e;
+      outline-offset: 2px;
+    }
+
+    /* Blue filled buttons (Contact us, Request a Demo) */
+    .btn-primary {
+      transition: background-color 160ms ease, transform 160ms ease-out;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-primary:hover { background-color: #3a7aef; }
+    }
+    .btn-primary:active { transform: scale(0.97); }
+
+    /* Ghost / transparent buttons (Download Investor Brief) */
+    .btn-ghost {
+      transition: background-color 160ms ease, transform 160ms ease-out;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-ghost:hover { background-color: rgba(255,255,255,0.14); }
+    }
+    .btn-ghost:active { transform: scale(0.97); }
+
+    /* LinkedIn icon */
+    .link-icon {
+      transition: opacity 160ms ease, transform 160ms ease-out;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .link-icon:hover { opacity: 0.8; }
+    }
+    .link-icon:active { transform: scale(0.92); }
+
+    /* Logo link */
+    .link-logo {
+      transition: opacity 160ms ease;
+    }
+    .link-logo:focus-visible {
+      outline: 2px solid #22c55e;
+      outline-offset: 2px;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .link-logo:hover { opacity: 0.85; }
+    }
+
+    /* ─── Shimmer border on CTA ─── */
+    @keyframes borderShimmer {
+      from { --shimmer-angle: 0deg; }
+      to   { --shimmer-angle: 360deg; }
+    }
+    @property --shimmer-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+    .btn-shimmer {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .btn-shimmer::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: conic-gradient(
+        from var(--shimmer-angle),
+        transparent 0%,
+        transparent 70%,
+        rgba(255,255,255,0.6) 78%,
+        rgba(255,255,255,0.9) 80%,
+        rgba(255,255,255,0.6) 82%,
+        transparent 90%,
+        transparent 100%
+      );
+      animation: borderShimmer 3s linear infinite;
+      z-index: -2;
+    }
+    .btn-shimmer::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      background: #4a8eff;
+      z-index: -1;
+      transition: background-color 160ms ease;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-shimmer:hover::after { background-color: #3a7aef; }
+    }
+
+    /* ─── Hero entry animation ─── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-animate {
+      opacity: 0;
+      animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .hero-animate-d1 { animation-delay: 0s; }
+    .hero-animate-d2 { animation-delay: 0.12s; }
+    .hero-animate-d3 { animation-delay: 0.24s; }
+    .hero-animate-d4 { animation-delay: 0.4s; }
+
+    /* ─── Scroll-triggered slide-up (reuses same keyframe) ─── */
+    .scroll-animate {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    .scroll-animate.is-visible {
+      animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .scroll-d1 { animation-delay: 0s; }
+    .scroll-d2 { animation-delay: 0.12s; }
+    .scroll-d3 { animation-delay: 0.24s; }
+    .scroll-d4 { animation-delay: 0.36s; }
+
+    /* ─── USP card progress cycle ─── */
+    /* Horizontal bar (desktop) */
+    .usp-progress-track {
+      height: 4px;
+      background: rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .usp-progress-fill {
+      position: absolute;
+      inset: 0;
+      background: #4a8eff;
+      transform-origin: left;
+      transform: scaleX(0);
+      will-change: transform;
+    }
+
+    /* Vertical bar (tablet + mobile) */
+    .usp-progress-track-v {
+      width: 4px;
+      background: rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .usp-progress-fill-v {
+      position: absolute;
+      inset: 0;
+      background: #4a8eff;
+      transform-origin: top;
+      transform: scaleY(0);
+      will-change: transform;
+    }
+
+    /* Card highlight states */
+    .usp-card {
+      cursor: pointer;
+      transition: opacity 400ms cubic-bezier(0.23, 1, 0.32, 1),
+                  background-color 400ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .usp-card.usp-dimmed {
+      opacity: 0.35;
+      background-color: #0e1118;
+    }
+    .usp-card.usp-active {
+      opacity: 1;
+      background-color: #1c2030;
+    }
+
+    /* Vertical card highlight states (tablet + mobile) */
+    .usp-card-v {
+      cursor: pointer;
+      transition: opacity 400ms cubic-bezier(0.23, 1, 0.32, 1),
+                  background-color 400ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .usp-card-v.usp-dimmed {
+      opacity: 0.35;
+      background-color: #0e1118;
+    }
+    .usp-card-v.usp-active {
+      opacity: 1;
+      background-color: #1c2030;
+    }
+  </style>
+</head>
+<body class="bg-bg-main text-white">
+
+  <!-- ─── NAVIGATION (fixed · 120px total) ─────────────────── -->
+  <nav class="fixed top-0 left-0 right-0 bg-bg-section border-b border-white/[0.08] z-[100]">
+    <div class="flex flex-col gap-2 items-center p-4 md:px-10">
+
+      <!-- Topbar: email + LinkedIn -->
+      <div class="h-10 w-full max-w-container flex items-center justify-between">
+        <span class="text-base text-white leading-[1.5]">info@omanalytix.com</span>
+        <a href="https://www.linkedin.com/company/om-analytix/?viewAsMember=true" target="_blank"
+           class="link-icon bg-white w-6 h-6 flex items-center justify-center">
+          <img src="assets/linkedin.svg"
+               alt="LinkedIn" class="w-5 h-5">
+        </a>
+      </div>
+
+      <!-- Main Nav: logo + CTA -->
+      <div class="h-10 w-full max-w-container flex items-center justify-between">
+        <a href="#" class="link-logo">
+          <img src="assets/logo.png"
+               alt="OM Analytix" class="h-8 w-[177px] object-contain">
+        </a>
+        <a href="https://omanalytix.ch/contact/"
+           class="btn btn-primary bg-blue h-9 md:h-10 px-4 inline-flex items-center justify-center text-sm md:text-base font-bold text-white whitespace-nowrap leading-[1.2]">
+          Contact us
+        </a>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- Page offset for fixed nav -->
+  <div class="pt-[120px]">
+
+    <!-- ─── HERO SECTION ───────────────────────────────────── -->
+    <section class="bg-bg-section overflow-hidden">
+
+      <!-- ── sm + md: STACKED layout ── -->
+      <div class="xl:hidden flex flex-col gap-8 p-4 md:p-10">
+
+        <!-- Text block -->
+        <div class="flex flex-col gap-4">
+          <h1 class="hero-animate hero-animate-d1 font-bold text-[32px] md:text-[40px] leading-[1.2] text-white">
+            See market-moving risk<br><span class="text-accent">before it hits</span> price.
+          </h1>
+          <p class="hero-animate hero-animate-d2 text-sm md:text-base leading-[1.5] text-white">
+            Atlas turns geopolitical, regulatory, logistics, and market-structure signals into
+            measurable risk channels — mapped to tickers, sectors, and scenarios so investors
+            can act faster and with more conviction.
+          </p>
+          <div class="hero-animate hero-animate-d3 flex flex-col md:flex-row gap-5 pt-4">
+            <a href="https://omanalytix.ch/#"
+               class="btn btn-primary btn-shimmer h-9 md:h-10 md:flex-1 px-4 bg-blue inline-flex items-center justify-center text-sm md:text-base font-bold text-white whitespace-nowrap leading-[1.2]">
+              Request a Demo
+            </a>
+            <a href="https://omanalytix.ch/#"
+               class="btn btn-ghost h-9 md:h-10 md:flex-1 px-4 bg-white/[0.08] inline-flex items-center justify-center gap-2 text-sm md:text-base font-bold text-white whitespace-nowrap leading-[1.2]">
+              Download Investor Brief
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="white"><path d="M12 16L7 11L8.4 9.55L11 12.15V4H13V12.15L15.6 9.55L17 11L12 16ZM4 20V15H6V18H18V15H20V20H4Z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Dashboard image — fixed size, overflows viewport, clipped by section -->
+        <div class="hero-animate hero-animate-d4 w-[506px] md:w-[822px] h-[320px] md:h-[520px] flex-shrink-0 relative">
+          <img src="assets/hero-dashboard.png"
+               alt="OM Atlas Dashboard"
+               class="absolute inset-0 w-full h-full object-cover object-left">
+        </div>
+
+      </div>
+
+      <!-- ── xl + 2xl: SIDE-BY-SIDE layout (639px fixed height) ── -->
+      <div class="hidden xl:block h-[639px]">
+        <div class="h-full max-w-container mx-auto flex gap-8 p-10">
+
+          <!-- Text column — flex-1, vertically centered content -->
+          <div class="flex-1 max-w-[644px] flex flex-col justify-center gap-4">
+            <h1 class="hero-animate hero-animate-d1 font-bold text-[48px] leading-[1.2] text-white">
+              See market-moving risk<br><span class="text-accent">before it hits</span> price.
+            </h1>
+            <p class="hero-animate hero-animate-d2 text-[18px] leading-[1.5] text-white">
+              Atlas turns geopolitical, regulatory, logistics, and market-structure signals into
+              measurable risk channels — mapped to tickers, sectors, and scenarios so investors
+              can act faster and with more conviction.
+            </p>
+            <div class="hero-animate hero-animate-d3 flex gap-5 pt-4">
+              <a href="https://omanalytix.ch/#"
+                 class="btn btn-primary btn-shimmer h-10 px-4 bg-blue inline-flex items-center justify-center text-base font-bold text-white whitespace-nowrap leading-[1.2]">
+                Request a Demo
+              </a>
+              <a href="https://omanalytix.ch/#"
+                 class="btn btn-ghost h-10 px-4 bg-white/[0.08] w-[249px] inline-flex items-center justify-center gap-2 text-base font-bold text-white whitespace-nowrap leading-[1.2]">
+                Download Investor Brief
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 16L7 11L8.4 9.55L11 12.15V4H13V12.15L15.6 9.55L17 11L12 16ZM4 20V15H6V18H18V15H20V20H4Z"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- Image column — fixed size, overflows viewport, clipped by section -->
+          <div class="hero-animate hero-animate-d4 flex-1 min-w-0 flex items-center">
+            <div class="w-[949px] h-[600px] flex-shrink-0 relative">
+              <img src="assets/hero-dashboard.png"
+                   alt="OM Atlas Dashboard"
+                   class="absolute inset-0 w-full h-full object-cover object-left">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ─── TRUSTED BY + USP CARDS ─────────────────────────── -->
+    <section class="scroll-animate bg-[#11141d]">
+
+      <!-- Trusted By -->
+      <div class="flex flex-col items-center gap-10 p-4 md:p-10">
+        <div class="flex flex-col md:flex-row items-center gap-6 md:gap-10">
+          <span class="text-[24px] text-white font-normal leading-[1.5]">Trusted by</span>
+          <div class="flex flex-col md:flex-row items-center gap-6 md:gap-10">
+            <a href="https://fintechsandbox.org/" target="_blank" class="block">
+              <img src="assets/logo-fintech-sandbox.svg" alt="Fintech Sandbox"
+                   class="h-[58px] md:h-[81px] w-auto object-contain brightness-0 invert">
+            </a>
+            <a href="https://greenfintech.network/" target="_blank" class="block">
+              <img src="assets/logo-gfn.svg" alt="Green Fintech Network"
+                   class="h-[58px] md:h-[81px] w-auto object-contain">
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- USP Card Grid -->
+      <div class="px-4 md:px-10 pb-10">
+        <!-- sm + md: stacked cards with vertical progress bar -->
+        <div class="xl:hidden max-w-container mx-auto flex">
+          <!-- Vertical progress bar -->
+          <div class="usp-progress-track-v">
+            <div class="usp-progress-fill-v" id="usp-progress-v"></div>
+          </div>
+
+          <!-- Cards stack -->
+          <div class="flex flex-col flex-1 min-w-0">
+            <!-- Card 1: Transmission Channels -->
+            <div class="usp-card-v bg-[#161922] border border-l-0 border-white/[0.08] p-[25px] flex gap-6" data-usp-v="0">
+              <div class="w-[65px] h-[65px] flex-shrink-0">
+                <img src="assets/icon-transmission.svg" alt="Transmission Channels" class="w-full h-full">
+              </div>
+              <div class="flex flex-col gap-2 min-w-0">
+                <h3 class="text-[24px] font-bold text-white leading-[1.5]">Transmission Channels</h3>
+                <p class="text-base leading-[1.5] text-muted">Atlas decomposes Transmission Channels into micro-events and maps them to the Transmission Channels, and validates their impact using public data, explicit time anchors and regime-change detection</p>
+              </div>
+            </div>
+
+            <!-- Card 2: Risk Decomposition -->
+            <div class="usp-card-v bg-[#161922] border border-l-0 border-t-0 border-white/[0.08] p-[25px] flex gap-6" data-usp-v="1">
+              <div class="w-[65px] h-[65px] flex-shrink-0">
+                <img src="assets/icon-risk.svg" alt="Risk Decomposition" class="w-full h-full">
+              </div>
+              <div class="flex flex-col gap-2 min-w-0">
+                <h3 class="text-[24px] font-bold text-white leading-[1.5]">Risk Decomposition</h3>
+                <p class="text-base leading-[1.5] text-muted">Atlas matches emerging events to historical precedents to frame likely market paths before they're priced in.</p>
+              </div>
+            </div>
+
+            <!-- Card 3: Portfolio & Ticker-level Impact -->
+            <div class="usp-card-v bg-[#161922] border border-l-0 border-t-0 border-white/[0.08] p-[25px] flex gap-6" data-usp-v="2">
+              <div class="w-[65px] h-[65px] flex-shrink-0">
+                <img src="assets/icon-portfolio.svg" alt="Portfolio & Ticker-level Impact" class="w-full h-full">
+              </div>
+              <div class="flex flex-col gap-2 min-w-0">
+                <h3 class="text-[24px] font-bold text-white leading-[1.5]">Portfolio &amp; Ticker-level Impact</h3>
+                <p class="text-base leading-[1.5] text-muted">Every micro-risk flows through to the security level, showing how exposure evolves. By graphing hundreds of micro-risks for each event OM Atlas can assign risk scores even for events that have never happened before.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- xl+: 3 cards in a row with shared borders + progress bar -->
+        <div class="hidden xl:block max-w-container mx-auto">
+          <!-- Progress bar -->
+          <div class="usp-progress-track">
+            <div class="usp-progress-fill" id="usp-progress"></div>
+          </div>
+
+          <!-- Cards row -->
+          <div class="flex">
+            <!-- Card 1: Transmission Channels -->
+            <div class="usp-card bg-[#161922] border-l border-t border-b border-white/[0.08] p-[25px] flex-1 flex gap-6" data-usp="0">
+              <div class="w-[65px] h-[65px] flex-shrink-0">
+                <img src="assets/icon-transmission.svg" alt="Transmission Channels" class="w-full h-full">
+              </div>
+              <div class="flex flex-col gap-2 min-w-0">
+                <h3 class="text-[24px] font-bold text-white leading-[1.5]">Transmission Channels</h3>
+                <p class="text-base leading-[1.5] text-muted">Atlas decomposes Transmission Channels into micro-events and maps them to the Transmission Channels, and validates their impact using public data, explicit time anchors and regime-change detection</p>
+              </div>
+            </div>
+
+            <!-- Card 2: Risk Decomposition -->
+            <div class="usp-card bg-[#161922] border-l border-t border-b border-white/[0.08] p-[25px] flex-1 flex gap-6" data-usp="1">
+              <div class="w-[65px] h-[65px] flex-shrink-0">
+                <img src="assets/icon-risk.svg" alt="Risk Decomposition" class="w-full h-full">
+              </div>
+              <div class="flex flex-col gap-2 min-w-0">
+                <h3 class="text-[24px] font-bold text-white leading-[1.5]">Risk Decomposition</h3>
+                <p class="text-base leading-[1.5] text-muted">Atlas matches emerging events to historical precedents to frame likely market paths before they're priced in.</p>
+              </div>
+            </div>
+
+            <!-- Card 3: Portfolio & Ticker-level Impact -->
+            <div class="usp-card bg-[#161922] border border-white/[0.08] p-[25px] flex-1 flex gap-6" data-usp="2">
+              <div class="w-[65px] h-[65px] flex-shrink-0">
+                <img src="assets/icon-portfolio.svg" alt="Portfolio & Ticker-level Impact" class="w-full h-full">
+              </div>
+              <div class="flex flex-col gap-2 min-w-0">
+                <h3 class="text-[24px] font-bold text-white leading-[1.5]">Portfolio &amp; Ticker-level Impact</h3>
+                <p class="text-base leading-[1.5] text-muted">Every micro-risk flows through to the security level, showing how exposure evolves. By graphing hundreds of micro-risks for each event OM Atlas can assign risk scores even for events that have never happened before.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- USP card progress cycle — tunable via DialKit -->
+  <script>
+  ;(function() {
+    // ── Tunable params (DialKit will write to these) ──
+    window.__uspParams = {
+      cycleDuration: 19,  // seconds (total cycle)
+      barHeight: 4        // px (bar thickness)
+    };
+
+    // ── Desktop (horizontal) elements ──
+    var hCards = document.querySelectorAll('.usp-card[data-usp]');
+    var hFill = document.getElementById('usp-progress');
+    var hTrack = hFill ? hFill.parentElement : null;
+
+    // ── Tablet/Mobile (vertical) elements ──
+    var vCards = document.querySelectorAll('.usp-card-v[data-usp-v]');
+    var vFill = document.getElementById('usp-progress-v');
+    var vTrack = vFill ? vFill.parentElement : null;
+
+    if ((!hCards.length && !vCards.length)) return;
+
+    var start = Date.now();
+    var hoverIndex = -1;
+    var savedElapsed = -1;
+
+    // ── Shared hover setup ──
+    function setupHover(cardList, fillEl) {
+      for (var c = 0; c < cardList.length; c++) {
+        (function(idx) {
+          cardList[idx].addEventListener('mouseenter', function() {
+            var cycle = window.__uspParams.cycleDuration * 1000;
+            savedElapsed = (Date.now() - start) % cycle;
+            hoverIndex = idx;
+          });
+          cardList[idx].addEventListener('mouseleave', function() {
+            if (hoverIndex !== idx) return;
+            start = Date.now() - savedElapsed;
+            hoverIndex = -1;
+            savedElapsed = -1;
+            requestAnimationFrame(function() {
+              if (hFill) hFill.style.transition = '';
+              if (vFill) vFill.style.transition = '';
+            });
+          });
+        })(c);
+      }
+    }
+
+    setupHover(hCards, hFill);
+    setupHover(vCards, vFill);
+
+    // ── Shared highlight function ──
+    function highlightCards(cardList, segment) {
+      for (var i = 0; i < cardList.length; i++) {
+        if (i === segment) {
+          cardList[i].classList.add('usp-active');
+          cardList[i].classList.remove('usp-dimmed');
+        } else {
+          cardList[i].classList.add('usp-dimmed');
+          cardList[i].classList.remove('usp-active');
+        }
+      }
+    }
+
+    function tick() {
+      var p = window.__uspParams;
+      var cycle = p.cycleDuration * 1000;
+      var third = cycle / 3;
+      var segment, progress;
+
+      if (hoverIndex >= 0) {
+        segment = hoverIndex;
+        progress = (hoverIndex + 1) / 3;
+        var jumpT = 'transform 300ms cubic-bezier(0.23, 1, 0.32, 1)';
+        if (hFill) hFill.style.transition = jumpT;
+        if (vFill) vFill.style.transition = jumpT;
+      } else {
+        if (hFill) hFill.style.transition = '';
+        if (vFill) vFill.style.transition = '';
+        var elapsed = (Date.now() - start) % cycle;
+        progress = elapsed / cycle;
+        segment = Math.min(Math.floor(elapsed / third), 2);
+      }
+
+      // ── Desktop: horizontal bar ──
+      if (hFill && hTrack) {
+        hTrack.style.height = p.barHeight + 'px';
+        hFill.style.transform = 'scaleX(' + progress + ')';
+      }
+
+      // ── Tablet/Mobile: vertical bar ──
+      if (vFill && vTrack) {
+        vTrack.style.width = p.barHeight + 'px';
+        vFill.style.transform = 'scaleY(' + progress + ')';
+      }
+
+      highlightCards(hCards, segment);
+      highlightCards(vCards, segment);
+
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  })();
+  </script>
+
+  <!-- Scroll-triggered entry animations -->
+  <script>
+  ;(function() {
+    var els = document.querySelectorAll('.scroll-animate');
+    if (!els.length) return;
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    els.forEach(function(el) { observer.observe(el); });
+  })();
+  </script>
+
+  <!-- DialKit Inspector — toggle with Ctrl+Shift+D -->
+  <script src="dialkit.js"></script>
+</body>
+</html>
