@@ -159,6 +159,7 @@
     .scroll-d4 { animation-delay: 0.36s; }
 
     /* ─── USP card progress cycle ─── */
+    /* Horizontal bar (desktop) */
     .usp-progress-track {
       height: 4px;
       background: rgba(255,255,255,0.06);
@@ -174,6 +175,23 @@
       will-change: transform;
     }
 
+    /* Vertical bar (tablet + mobile) */
+    .usp-progress-track-v {
+      width: 4px;
+      background: rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .usp-progress-fill-v {
+      position: absolute;
+      inset: 0;
+      background: #4a8eff;
+      transform-origin: top;
+      transform: scaleY(0);
+      will-change: transform;
+    }
+
     /* Card highlight states */
     .usp-card {
       cursor: pointer;
@@ -185,6 +203,21 @@
       background-color: #0e1118;
     }
     .usp-card.usp-active {
+      opacity: 1;
+      background-color: #1c2030;
+    }
+
+    /* Vertical card highlight states (tablet + mobile) */
+    .usp-card-v {
+      cursor: pointer;
+      transition: opacity 400ms cubic-bezier(0.23, 1, 0.32, 1),
+                  background-color 400ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .usp-card-v.usp-dimmed {
+      opacity: 0.35;
+      background-color: #0e1118;
+    }
+    .usp-card-v.usp-active {
       opacity: 1;
       background-color: #1c2030;
     }
@@ -257,7 +290,7 @@
         <div class="hero-animate hero-animate-d4 w-[506px] md:w-[822px] h-[320px] md:h-[520px] flex-shrink-0 relative">
           <img src="assets/hero-dashboard.png"
                alt="OM Atlas Dashboard"
-               class="absolute inset-0 w-full h-full object-cover">
+               class="absolute inset-0 w-full h-full object-cover object-left">
         </div>
 
       </div>
@@ -325,38 +358,46 @@
 
       <!-- USP Card Grid -->
       <div class="px-4 md:px-10 pb-10">
-        <!-- sm + md: stacked cards -->
-        <div class="xl:hidden max-w-container mx-auto flex flex-col">
-          <!-- Card 1: Transmission Channels -->
-          <div class="bg-[#161922] border border-white/[0.08] p-[25px] flex gap-6">
-            <div class="w-[65px] h-[65px] flex-shrink-0">
-              <img src="assets/icon-transmission.svg" alt="Transmission Channels" class="w-full h-full">
-            </div>
-            <div class="flex flex-col gap-2 min-w-0">
-              <h3 class="text-[24px] font-bold text-white leading-[1.5]">Transmission Channels</h3>
-              <p class="text-base leading-[1.5] text-muted">Atlas decomposes Transmission Channels into micro-events and maps them to the Transmission Channels, and validates their impact using public data, explicit time anchors and regime-change detection</p>
-            </div>
+        <!-- sm + md: stacked cards with vertical progress bar -->
+        <div class="xl:hidden max-w-container mx-auto flex">
+          <!-- Vertical progress bar -->
+          <div class="usp-progress-track-v">
+            <div class="usp-progress-fill-v" id="usp-progress-v"></div>
           </div>
 
-          <!-- Card 2: Risk Decomposition -->
-          <div class="bg-[#161922] border border-t-0 border-white/[0.08] p-[25px] flex gap-6">
-            <div class="w-[65px] h-[65px] flex-shrink-0">
-              <img src="assets/icon-risk.svg" alt="Risk Decomposition" class="w-full h-full">
+          <!-- Cards stack -->
+          <div class="flex flex-col flex-1 min-w-0">
+            <!-- Card 1: Transmission Channels -->
+            <div class="usp-card-v bg-[#161922] border border-l-0 border-white/[0.08] p-[25px] flex gap-6" data-usp-v="0">
+              <div class="w-[65px] h-[65px] flex-shrink-0">
+                <img src="assets/icon-transmission.svg" alt="Transmission Channels" class="w-full h-full">
+              </div>
+              <div class="flex flex-col gap-2 min-w-0">
+                <h3 class="text-[24px] font-bold text-white leading-[1.5]">Transmission Channels</h3>
+                <p class="text-base leading-[1.5] text-muted">Atlas decomposes Transmission Channels into micro-events and maps them to the Transmission Channels, and validates their impact using public data, explicit time anchors and regime-change detection</p>
+              </div>
             </div>
-            <div class="flex flex-col gap-2 min-w-0">
-              <h3 class="text-[24px] font-bold text-white leading-[1.5]">Risk Decomposition</h3>
-              <p class="text-base leading-[1.5] text-muted">Atlas matches emerging events to historical precedents to frame likely market paths before they're priced in.</p>
-            </div>
-          </div>
 
-          <!-- Card 3: Portfolio & Ticker-level Impact -->
-          <div class="bg-[#161922] border border-t-0 border-white/[0.08] p-[25px] flex gap-6">
-            <div class="w-[65px] h-[65px] flex-shrink-0">
-              <img src="assets/icon-portfolio.svg" alt="Portfolio & Ticker-level Impact" class="w-full h-full">
+            <!-- Card 2: Risk Decomposition -->
+            <div class="usp-card-v bg-[#161922] border border-l-0 border-t-0 border-white/[0.08] p-[25px] flex gap-6" data-usp-v="1">
+              <div class="w-[65px] h-[65px] flex-shrink-0">
+                <img src="assets/icon-risk.svg" alt="Risk Decomposition" class="w-full h-full">
+              </div>
+              <div class="flex flex-col gap-2 min-w-0">
+                <h3 class="text-[24px] font-bold text-white leading-[1.5]">Risk Decomposition</h3>
+                <p class="text-base leading-[1.5] text-muted">Atlas matches emerging events to historical precedents to frame likely market paths before they're priced in.</p>
+              </div>
             </div>
-            <div class="flex flex-col gap-2 min-w-0">
-              <h3 class="text-[24px] font-bold text-white leading-[1.5]">Portfolio &amp; Ticker-level Impact</h3>
-              <p class="text-base leading-[1.5] text-muted">Every micro-risk flows through to the security level, showing how exposure evolves. By graphing hundreds of micro-risks for each event OM Atlas can assign risk scores even for events that have never happened before.</p>
+
+            <!-- Card 3: Portfolio & Ticker-level Impact -->
+            <div class="usp-card-v bg-[#161922] border border-l-0 border-t-0 border-white/[0.08] p-[25px] flex gap-6" data-usp-v="2">
+              <div class="w-[65px] h-[65px] flex-shrink-0">
+                <img src="assets/icon-portfolio.svg" alt="Portfolio & Ticker-level Impact" class="w-full h-full">
+              </div>
+              <div class="flex flex-col gap-2 min-w-0">
+                <h3 class="text-[24px] font-bold text-white leading-[1.5]">Portfolio &amp; Ticker-level Impact</h3>
+                <p class="text-base leading-[1.5] text-muted">Every micro-risk flows through to the security level, showing how exposure evolves. By graphing hundreds of micro-risks for each event OM Atlas can assign risk scores even for events that have never happened before.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -419,77 +460,95 @@
       barHeight: 4        // px (bar thickness)
     };
 
-    var cards = document.querySelectorAll('.usp-card[data-usp]');
-    var fill = document.getElementById('usp-progress');
-    var track = fill ? fill.parentElement : null;
-    if (!cards.length || !fill || !track) return;
+    // ── Desktop (horizontal) elements ──
+    var hCards = document.querySelectorAll('.usp-card[data-usp]');
+    var hFill = document.getElementById('usp-progress');
+    var hTrack = hFill ? hFill.parentElement : null;
+
+    // ── Tablet/Mobile (vertical) elements ──
+    var vCards = document.querySelectorAll('.usp-card-v[data-usp-v]');
+    var vFill = document.getElementById('usp-progress-v');
+    var vTrack = vFill ? vFill.parentElement : null;
+
+    if ((!hCards.length && !vCards.length)) return;
 
     var start = Date.now();
-    var hoverIndex = -1;       // -1 = no hover, 0/1/2 = hovered card
-    var savedElapsed = -1;     // elapsed time when hover started
+    var hoverIndex = -1;
+    var savedElapsed = -1;
 
-    // ── Hover listeners on each card ──
-    for (var c = 0; c < cards.length; c++) {
-      (function(idx) {
-        cards[idx].addEventListener('mouseenter', function() {
-          var p = window.__uspParams;
-          var cycle = p.cycleDuration * 1000;
-          // Save where the auto-progress was
-          savedElapsed = (Date.now() - start) % cycle;
-          hoverIndex = idx;
-        });
-        cards[idx].addEventListener('mouseleave', function() {
-          if (hoverIndex !== idx) return;
-          var p = window.__uspParams;
-          var cycle = p.cycleDuration * 1000;
-          // Resume: adjust start so elapsed picks up from saved position
-          start = Date.now() - savedElapsed;
-          hoverIndex = -1;
-          savedElapsed = -1;
-          // Remove the fast transition after a frame
-          requestAnimationFrame(function() {
-            fill.style.transition = '';
+    // ── Shared hover setup ──
+    function setupHover(cardList, fillEl) {
+      for (var c = 0; c < cardList.length; c++) {
+        (function(idx) {
+          cardList[idx].addEventListener('mouseenter', function() {
+            var cycle = window.__uspParams.cycleDuration * 1000;
+            savedElapsed = (Date.now() - start) % cycle;
+            hoverIndex = idx;
           });
-        });
-      })(c);
+          cardList[idx].addEventListener('mouseleave', function() {
+            if (hoverIndex !== idx) return;
+            start = Date.now() - savedElapsed;
+            hoverIndex = -1;
+            savedElapsed = -1;
+            requestAnimationFrame(function() {
+              if (hFill) hFill.style.transition = '';
+              if (vFill) vFill.style.transition = '';
+            });
+          });
+        })(c);
+      }
+    }
+
+    setupHover(hCards, hFill);
+    setupHover(vCards, vFill);
+
+    // ── Shared highlight function ──
+    function highlightCards(cardList, segment) {
+      for (var i = 0; i < cardList.length; i++) {
+        if (i === segment) {
+          cardList[i].classList.add('usp-active');
+          cardList[i].classList.remove('usp-dimmed');
+        } else {
+          cardList[i].classList.add('usp-dimmed');
+          cardList[i].classList.remove('usp-active');
+        }
+      }
     }
 
     function tick() {
       var p = window.__uspParams;
       var cycle = p.cycleDuration * 1000;
       var third = cycle / 3;
-
-      // Apply thickness live
-      track.style.height = p.barHeight + 'px';
-
       var segment, progress;
 
       if (hoverIndex >= 0) {
-        // ── Hover override: jump bar to hovered card's segment ──
         segment = hoverIndex;
-        // Bar fills to the END of the hovered card's segment
         progress = (hoverIndex + 1) / 3;
-        // Use a fast transition for the jump
-        fill.style.transition = 'transform 300ms cubic-bezier(0.23, 1, 0.32, 1)';
+        var jumpT = 'transform 300ms cubic-bezier(0.23, 1, 0.32, 1)';
+        if (hFill) hFill.style.transition = jumpT;
+        if (vFill) vFill.style.transition = jumpT;
       } else {
-        // ── Auto mode: progress bar fills continuously ──
-        fill.style.transition = '';
+        if (hFill) hFill.style.transition = '';
+        if (vFill) vFill.style.transition = '';
         var elapsed = (Date.now() - start) % cycle;
         progress = elapsed / cycle;
         segment = Math.min(Math.floor(elapsed / third), 2);
       }
 
-      fill.style.transform = 'scaleX(' + progress + ')';
-
-      for (var i = 0; i < cards.length; i++) {
-        if (i === segment) {
-          cards[i].classList.add('usp-active');
-          cards[i].classList.remove('usp-dimmed');
-        } else {
-          cards[i].classList.add('usp-dimmed');
-          cards[i].classList.remove('usp-active');
-        }
+      // ── Desktop: horizontal bar ──
+      if (hFill && hTrack) {
+        hTrack.style.height = p.barHeight + 'px';
+        hFill.style.transform = 'scaleX(' + progress + ')';
       }
+
+      // ── Tablet/Mobile: vertical bar ──
+      if (vFill && vTrack) {
+        vTrack.style.width = p.barHeight + 'px';
+        vFill.style.transform = 'scaleY(' + progress + ')';
+      }
+
+      highlightCards(hCards, segment);
+      highlightCards(vCards, segment);
 
       requestAnimationFrame(tick);
     }
